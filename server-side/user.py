@@ -26,7 +26,7 @@ class User:
 
     @staticmethod
     def add_user(user_name, password):
-        player_info = dict(user_name=user_name, password=password)
+        player_info = dict(user_name=user_name, password=password, data={})
         with open(str(path) + "\\json" + "\\" + user_name + ".json", "w") as user_json:
             json.dump(player_info, user_json, indent=2)
 
@@ -36,46 +36,64 @@ class User:
             self.user_info = json.load(user_json)
 
     def add_key_string(self, key, value):
-        self.user_info[key] = value
+        self.user_info["data"][key] = value
+        return value
+
+    def get_key_string(self, key):
+        if key in self.user_info["data"]:
+            return self.user_info["data"][key]
+        else:
+            return "No key found"
 
     def add_key_list(self, key, value):
-        if self.user_info[key] is None:
-            self.user_info[key] = []
-        elif not isinstance(self.user_info[key], list):
+        if self.user_info["data"][key] is None:
+            self.user_info["data"][key] = []
+        elif not isinstance(self.user_info["data"][key], list):
             return "Not a list"
-        self.user_info[key].append(value)
+        self.user_info["data"][key].append(value)
         return value
 
     def get_list_length(self, key):
-        if self.user_info[key] is None:
-            self.user_info[key] = []
-        elif not isinstance(self.user_info[key], list):
+        if self.user_info["data"][key] is None:
+            self.user_info["data"][key] = []
+        elif not isinstance(self.user_info["data"][key], list):
             return "Not a list"
-        return self.user_info[key].length
+        return str(len(self.user_info["data"][key]))
 
     def get_list_element(self, start, end, key):
-        if start < 0 or end < 0 or start > end or not isinstance(self.user_info[key], list) or end >= self.user_info[key].length :
+        if start < 0 or end < 0 or start > end or not isinstance(self.user_info["data"][key], list) or\
+                end >= len(self.user_info["data"][key]) :
             return "Not good input"
         else:
-            result = []
+            result = ""
             for i in range(start, end + 1):
-                result.append(self.user_info[key])
+                result += self.user_info["data"][key][i] + " "
             return result
 
     def add_list_element(self, key, values):
+        if key not in self.user_info["data"]:
+            self.user_info["data"][key] = []
+        if not isinstance(self.user_info["data"][key], list):
+            return "Wrong command"
         for value in values:
-            self.user_info[key].append(value)
+            self.user_info["data"][key].append(value)
+        return self.get_list_element(0, len(self.user_info["data"][key]) - 1, key)
 
     def lpop(self, key):
-        if not isinstance(self.user_info[key], list):
+        if not isinstance(self.user_info["data"][key], list):
             return "Not a list"
-        return self.user_info[key].pop(0)
+        elif len(self.user_info["data"][key]) == 0:
+            return "Nothing to pop"
+        return self.user_info["data"][key].pop(0)
 
     def rpop(self, key):
-        if not isinstance(self.user_info[key], list):
+        if not isinstance(self.user_info["data"][key], list):
             return "Not a list"
-        return self.user_info[key].pop()
+        elif len(self.user_info["data"][key]) == 0:
+            return "Nothing to pop"
+        return self.user_info["data"][key].pop()
 
     def save_progress(self):
         with open(self.json_path, "w") as user_json:
             json.dump(self.user_info, user_json, indent=2)
+        return "Saved"

@@ -2,13 +2,19 @@ import socket
 from random import randint
 from threading import Thread
 
-from .user import User
-from .network_communication import send_message, receive_message
+if __name__ == '__main__':
+    from user import User
+    from session import Session
+else:
+    from .user import User
+    from .session import Session
+from network_communication import send_message, receive_message
 listening_port = 100
 
 
 def handle_client_verification(private_socket, client_address):
     option = receive_message(private_socket)[0]
+    user = None
     if option == '1':
         while True:
             user_name = receive_message(private_socket)[0]
@@ -19,6 +25,7 @@ def handle_client_verification(private_socket, client_address):
                 User.add_user(user_name, password)
                 send_message("Success", client_address, private_socket)
                 print(user_name + " registered and login successfully")
+                user = User(user_name)
                 break
     elif option == '2':
         while True:
@@ -27,11 +34,14 @@ def handle_client_verification(private_socket, client_address):
             if User.is_login_correct(user_name, password):
                 send_message("Success", client_address, private_socket)
                 print(user_name + " login successfully")
+                user = User(user_name)
                 break
             else:
                 send_message("Incorrect", client_address, private_socket)
-
-    private_socket.close()
+    session = Session(socket=private_socket, user=user, user_address= client_address)
+    thread = Thread(target=session.run, args=())
+    thread.start()
+    thread.join()
 
 
 listening_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
