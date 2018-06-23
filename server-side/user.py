@@ -46,7 +46,7 @@ class User:
             return "No key found"
 
     def add_key_list(self, key, value):
-        if self.user_info["data"][key] is None:
+        if key not in self.user_info["data"]:
             self.user_info["data"][key] = []
         elif not isinstance(self.user_info["data"][key], list):
             return "Not a list"
@@ -54,7 +54,7 @@ class User:
         return value
 
     def get_list_length(self, key):
-        if self.user_info["data"][key] is None:
+        if key not in self.user_info["data"]:
             self.user_info["data"][key] = []
         elif not isinstance(self.user_info["data"][key], list):
             return "Not a list"
@@ -74,7 +74,7 @@ class User:
         if key not in self.user_info["data"]:
             self.user_info["data"][key] = []
         if not isinstance(self.user_info["data"][key], list):
-            return "Wrong command"
+            return "Not a list"
         for value in values:
             self.user_info["data"][key].append(value)
         return self.get_list_element(0, len(self.user_info["data"][key]) - 1, key)
@@ -92,6 +92,19 @@ class User:
         elif len(self.user_info["data"][key]) == 0:
             return "Nothing to pop"
         return self.user_info["data"][key].pop()
+
+    def get_all_keys(self):
+        keys = ""
+        for key, value in self.user_info["data"].items():
+            keys += key + " "
+        return keys
+
+    def del_key(self, key):
+        return self.user_info["data"].pop(key, "No such key")
+
+    def clear_all_key(self):
+        self.user_info["data"] = {}
+        return "Cleared"
 
     def save_progress(self):
         with open(self.json_path, "w") as user_json:

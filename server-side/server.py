@@ -42,6 +42,7 @@ def handle_client_verification(private_socket, client_address):
     thread = Thread(target=session.run, args=())
     thread.start()
     thread.join()
+    private_socket.close()
 
 
 listening_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
